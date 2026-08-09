@@ -27,16 +27,4 @@ return {
     ft = { "markdown" },
     build = "cd app && npm install",
   },
-
-  -- Improved markdown editing
-  {
-    "preservim/vim-markdown",
-    ft = { "markdown" },
-    init = function()
-      vim.g.vim_markdown_folding_disabled = 1
-      vim.g.vim_markdown_frontmatter = 1
-      vim.g.vim_markdown_conceal = 1
-      vim.g.vim_markdown_conceal_code_blocks = 0
-    end,
-  },
 }

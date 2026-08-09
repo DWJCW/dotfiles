@@ -8,7 +8,9 @@ return {
       image = {
         enabled = true,
         doc = {
-          enabled = true,
+          -- Do not render LaTeX/Markdown source formulas and image references
+          -- inline. Opening a standalone PDF/image buffer remains supported.
+          enabled = false,
           inline = true,
           float = true,
           max_width = 80,
