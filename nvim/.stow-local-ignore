@@ -1,0 +1,2 @@
+# Keep this package's complete Neovim tree under Stow management.
+# GNU Stow always excludes this control file itself.

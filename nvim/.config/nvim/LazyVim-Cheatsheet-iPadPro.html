@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LazyVim iPad Pro 11 英寸中文小抄</title>
+  <style>
+    :root {
+      --bg: #16161e;
+      --panel: #1f2335;
+      --panel-2: #24283b;
+      --line: #3b4261;
+      --text: #c0caf5;
+      --muted: #8990b3;
+      --blue: #7aa2f7;
+      --cyan: #7dcfff;
+      --green: #9ece6a;
+      --yellow: #e0af68;
+      --purple: #bb9af7;
+      --red: #f7768e;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 2420px;
+      height: 1668px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    body {
+      padding: 50px 56px;
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 92% 2%, rgba(187, 154, 247, .14), transparent 27%),
+        radial-gradient(circle at 8% 96%, rgba(125, 207, 255, .11), transparent 29%),
+        var(--bg);
+    }
+
+    .header {
+      height: 112px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .title-wrap { display: flex; align-items: center; gap: 27px; }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      color: #15161e;
+      font: 800 44px/1 "SFMono-Regular", Menlo, monospace;
+      background: linear-gradient(135deg, var(--cyan), var(--blue) 58%, var(--purple));
+      box-shadow: 0 18px 55px rgba(122, 162, 247, .28);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 51px;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      font-weight: 750;
+      color: #e8eaf6;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      font-size: 21px;
+      color: var(--muted);
+    }
+
+    .legend strong { color: var(--text); font-weight: 650; }
+
+    kbd {
+      display: inline-block;
+      padding: 4px 9px 5px;
+      border: 1px solid #4d567d;
+      border-bottom-width: 3px;
+      border-radius: 9px;
+      color: #eef1ff;
+      background: #303653;
+      font-family: "SFMono-Regular", Menlo, Monaco, monospace;
+      font-size: .86em;
+      font-weight: 650;
+      white-space: nowrap;
+      box-shadow: 0 5px 16px rgba(0, 0, 0, .16);
+    }
+
+    .quickbar {
+      height: 82px;
+      margin-top: 12px;
+      padding: 9px 20px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      align-items: center;
+      background: linear-gradient(100deg, rgba(122,162,247,.13), rgba(187,154,247,.08));
+      border: 1px solid rgba(122, 162, 247, .34);
+      border-radius: 22px;
+    }
+
+    .quick { min-width: 0; text-align: center; font-size: 20px; color: var(--muted); }
+    .quick kbd { margin-top: 4px; font-size: 21px; }
+
+    .grid {
+      height: 1298px;
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .column {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 15px 19px 14px;
+      background: linear-gradient(145deg, rgba(36, 40, 59, .98), rgba(30, 33, 50, .98));
+      border: 1px solid rgba(86, 95, 135, .54);
+      border-radius: 22px;
+      box-shadow: 0 18px 46px rgba(8, 9, 14, .24);
+    }
+
+    .card.grow { flex: 1; }
+
+    .card h2 {
+      margin: 0 0 9px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #eef1ff;
+      font-size: 29px;
+      line-height: 1.1;
+      letter-spacing: -.5px;
+    }
+
+    .badge {
+      width: 33px;
+      height: 33px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      color: #14151d;
+      font: 800 18px/1 "SFMono-Regular", Menlo, monospace;
+    }
+
+    .blue { background: var(--blue); }
+    .cyan { background: var(--cyan); }
+    .green { background: var(--green); }
+    .yellow { background: var(--yellow); }
+    .purple { background: var(--purple); }
+    .red { background: var(--red); }
+
+    .rows { display: flex; flex-direction: column; }
+
+    .row {
+      min-height: 41px;
+      padding: 4px 0;
+      display: grid;
+      grid-template-columns: 45% 55%;
+      gap: 10px;
+      align-items: center;
+      border-top: 1px solid rgba(86, 95, 135, .3);
+    }
+
+    .row:first-child { border-top: 0; }
+    .row .key { font-size: 23px; color: #dbe2ff; }
+    .row .desc { font-size: 23px; line-height: 1.2; color: #b8c1e8; }
+
+    .note {
+      padding: 11px 15px;
+      color: #b8c1e8;
+      background: rgba(122, 162, 247, .08);
+      border: 1px solid rgba(122, 162, 247, .27);
+      border-radius: 18px;
+      font-size: 21px;
+      line-height: 1.34;
+    }
+
+    .note strong { color: var(--cyan); }
+    .note code { color: var(--yellow); font-family: "SFMono-Regular", Menlo, monospace; }
+
+    .footer {
+      height: 36px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #7f87aa;
+      font-size: 18px;
+      letter-spacing: .3px;
+    }
+
+    .footer strong { color: #a9b1d6; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="title-wrap">
+      <div class="logo">LV</div>
+      <div>
+        <h1>LazyVim 中文小抄</h1>
+        <div class="subtitle">论文写作 · LaTeX · Python · LazyVim 16</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><kbd>Space</kbd> <strong>Leader</strong></span>
+      <span><kbd>\</kbd> <strong>LocalLeader</strong></span>
+    </div>
+  </header>
+
+  <section class="quickbar"><div class="quick">文件树<br><kbd>Space e</kbd></div>
+<div class="quick">找文件<br><kbd>Space Space</kbd></div>
+<div class="quick">全文搜索<br><kbd>Space /</kbd></div>
+<div class="quick">切文件<br><kbd>Shift h / l</kbd></div>
+<div class="quick">LaTeX 编译<br><kbd>\ l l</kbd></div>
+<div class="quick">Lazygit<br><kbd>Space g g</kbd></div></section>
+
+  <main class="grid">
+    <div class="column"><section class="card"><h2><span class="badge cyan">F</span>文件、搜索与文件树</h2><div class="rows"><div class="row"><div class="key"><kbd>Space e</kbd></div><div class="desc">项目文件树</div></div>
+<div class="row"><div class="key"><kbd>Space Space</kbd></div><div class="desc">查找项目文件</div></div>
+<div class="row"><div class="key"><kbd>Space f f</kbd></div><div class="desc">同上：查找文件</div></div>
+<div class="row"><div class="key"><kbd>Space /</kbd></div><div class="desc">全文搜索</div></div>
+<div class="row"><div class="key"><kbd>Space s w</kbd></div><div class="desc">搜索当前词/选区</div></div>
+<div class="row"><div class="key"><kbd>Space f r</kbd></div><div class="desc">最近文件</div></div>
+<div class="row"><div class="key"><kbd>Space s k</kbd></div><div class="desc">搜索所有快捷键</div></div></div></section>
+<section class="card grow"><h2><span class="badge blue">B</span>Buffer、编辑分屏与 Tab</h2><div class="rows"><div class="row"><div class="key"><kbd>Shift h / l</kbd></div><div class="desc">前/后一个 buffer</div></div>
+<div class="row"><div class="key"><kbd>[ b</kbd> <kbd>] b</kbd></div><div class="desc">前/后一个 buffer</div></div>
+<div class="row"><div class="key"><kbd>Space ,</kbd></div><div class="desc">列出并选择 buffer</div></div>
+<div class="row"><div class="key"><kbd>Space b d</kbd></div><div class="desc">关闭当前 buffer</div></div>
+<div class="row"><div class="key"><kbd>Space b o</kbd></div><div class="desc">关闭其他 buffer</div></div>
+<div class="row"><div class="key"><kbd>Ctrl h/j/k/l</kbd></div><div class="desc">移动到相邻编辑分屏</div></div>
+<div class="row"><div class="key"><kbd>Space |</kbd> <kbd>Space -</kbd></div><div class="desc">左右/上下打开编辑分屏</div></div>
+<div class="row"><div class="key"><kbd>q</kbd></div><div class="desc">关闭文件树/选择器/帮助窗</div></div>
+<div class="row"><div class="key"><kbd>Space w d</kbd></div><div class="desc">关闭当前编辑分屏</div></div>
+<div class="row"><div class="key"><kbd>Space Tab Tab</kbd></div><div class="desc">新建 tabpage</div></div>
+<div class="row"><div class="key"><kbd>Space Tab [</kbd> <kbd>Space Tab ]</kbd></div><div class="desc">前/后一个 tabpage</div></div></div></section>
+<div class="note"><strong>窗口要分清：</strong><code>Space | / Space -</code> 打开编辑分屏，<code>Space w d</code> 关闭编辑分屏；<code>q</code> 关闭文件树、选择器、help 等工具窗口；<code>Space b d</code> 关闭文件 buffer。</div></div>
+    <div class="column"><section class="card"><h2><span class="badge green">T</span>LaTeX / VimTeX</h2><div class="rows"><div class="row"><div class="key"><kbd>\ l l</kbd></div><div class="desc">启动/停止持续编译</div></div>
+<div class="row"><div class="key"><kbd>\ l v</kbd></div><div class="desc">Skim 正向跳转</div></div>
+<div class="row"><div class="key"><kbd>\ l e</kbd></div><div class="desc">查看编译错误</div></div>
+<div class="row"><div class="key"><kbd>\ l o</kbd></div><div class="desc">完整编译输出</div></div>
+<div class="row"><div class="key"><kbd>\ l i</kbd></div><div class="desc">VimTeX 项目信息</div></div>
+<div class="row"><div class="key"><kbd>\ l t</kbd></div><div class="desc">LaTeX 目录</div></div>
+<div class="row"><div class="key"><kbd>\ l k</kbd></div><div class="desc">停止编译器</div></div>
+<div class="row"><div class="key"><kbd>\ l c</kbd></div><div class="desc">清理普通编译产物</div></div>
+<div class="row"><div class="key"><kbd>⇧⌘ + 点击 PDF</kbd></div><div class="desc">Skim 反向跳回源码</div></div></div></section>
+<section class="card grow"><h2><span class="badge purple">C</span>编辑、诊断与 LSP</h2><div class="rows"><div class="row"><div class="key"><kbd>Ctrl s</kbd></div><div class="desc">保存</div></div>
+<div class="row"><div class="key"><kbd>Space c f</kbd></div><div class="desc">格式化文件/选区</div></div>
+<div class="row"><div class="key"><kbd>g d</kbd></div><div class="desc">跳到定义</div></div>
+<div class="row"><div class="key"><kbd>g r</kbd></div><div class="desc">查找引用</div></div>
+<div class="row"><div class="key"><kbd>K</kbd></div><div class="desc">光标处文档说明</div></div>
+<div class="row"><div class="key"><kbd>Space c r</kbd></div><div class="desc">重命名符号</div></div>
+<div class="row"><div class="key"><kbd>Space c a</kbd></div><div class="desc">Code Action</div></div>
+<div class="row"><div class="key"><kbd>[ d</kbd> <kbd>] d</kbd></div><div class="desc">前/后一个诊断</div></div>
+<div class="row"><div class="key"><kbd>Space x x</kbd></div><div class="desc">项目诊断列表</div></div>
+<div class="row"><div class="key"><kbd>Space c v</kbd></div><div class="desc">Python 选择虚拟环境</div></div></div></section>
+<div class="note"><strong>当前工具链：</strong>Pyright + Ruff · Texlab + VimTeX · Marksman · JSON/YAML/TOML/Bash LSP。AI、DAP 和测试框架未启用。</div></div>
+    <div class="column"><section class="card"><h2><span class="badge yellow">M</span>Markdown 与图片</h2><div class="rows"><div class="row"><div class="key"><kbd>Space c p</kbd></div><div class="desc">浏览器 Markdown 预览</div></div>
+<div class="row"><div class="key"><kbd>Space u m</kbd></div><div class="desc">Nvim 内 Markdown 美化</div></div>
+<div class="row"><div class="key"><kbd>:edit 图.png</kbd></div><div class="desc">Nvim 内预览图片</div></div>
+<div class="row"><div class="key"><kbd>:edit 文档.pdf</kbd></div><div class="desc">Nvim 内快速看 PDF</div></div>
+<div class="row"><div class="key"><kbd>g x</kbd></div><div class="desc">用系统应用打开目标</div></div></div></section>
+<section class="card"><h2><span class="badge red">G</span>Git 与终端</h2><div class="rows"><div class="row"><div class="key"><kbd>Space g g</kbd></div><div class="desc">项目根目录 Lazygit</div></div>
+<div class="row"><div class="key"><kbd>Space g s</kbd></div><div class="desc">Git 状态</div></div>
+<div class="row"><div class="key"><kbd>[ h</kbd> <kbd>] h</kbd></div><div class="desc">前/后一个修改块</div></div>
+<div class="row"><div class="key"><kbd>Space g h p</kbd></div><div class="desc">预览当前修改块</div></div>
+<div class="row"><div class="key"><kbd>Space f t</kbd></div><div class="desc">项目根目录终端</div></div>
+<div class="row"><div class="key"><kbd>Ctrl /</kbd></div><div class="desc">显示/隐藏浮动终端</div></div></div></section>
+<section class="card grow"><h2><span class="badge cyan">?</span>帮助与维护</h2><div class="rows"><div class="row"><div class="key"><kbd>Space（稍等）</kbd></div><div class="desc">which-key 提示</div></div>
+<div class="row"><div class="key"><kbd>Space ?</kbd></div><div class="desc">当前 buffer 快捷键</div></div>
+<div class="row"><div class="key"><kbd>:NvimCheatsheetImage</kbd></div><div class="desc">打开本图片</div></div>
+<div class="row"><div class="key"><kbd>:NvimCheatsheetAudit</kbd></div><div class="desc">审计全部小抄键位</div></div>
+<div class="row"><div class="key"><kbd>:Lazy</kbd></div><div class="desc">插件管理</div></div>
+<div class="row"><div class="key"><kbd>:Mason</kbd></div><div class="desc">语言工具管理</div></div>
+<div class="row"><div class="key"><kbd>:checkhealth</kbd></div><div class="desc">健康检查</div></div>
+<div class="row"><div class="key"><kbd>:VimtexInfo</kbd></div><div class="desc">LaTeX 故障排查</div></div></div></section>
+<div class="note"><strong>防漂移：</strong>配置或插件锁文件变化后，启动 Nvim 会提醒。运行 <code>:NvimCheatsheetAudit</code> 可逐项复核；有失败时不会覆盖小抄。</div></div>
+  </main>
+
+  <footer class="footer">
+    <span><strong>LazyVim 16 · TokyoNight Moon</strong></span>
+    <span>2420 × 1668 · iPad Pro 11″ 横屏</span>
+    <span>自动审计 69/69 通过 · 2026-08-09</span>
+  </footer>
+</body>
+</html>

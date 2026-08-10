@@ -6,7 +6,8 @@ Managed packages:
 
 - `tmux`
 - `kitty`
-- `nvim`
+- `nvim` (the complete LazyVim configuration, including the generated
+  iPad cheat sheet and its source/audit scripts)
 
 Install or refresh links from the repository root:
 
@@ -22,3 +23,10 @@ stow -D -t "$HOME" tmux kitty nvim
 
 Repository layout follows Stow's target-relative structure, so files inside
 each package mirror their final path under `$HOME`.
+
+Verify that the active Neovim configuration is byte-for-byte identical to
+the tracked configuration and is linked to this repository:
+
+```sh
+./tests/test-nvim-dotfiles-sync.sh
+```
