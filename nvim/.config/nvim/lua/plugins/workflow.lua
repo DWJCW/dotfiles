@@ -37,9 +37,11 @@ return {
     opts = {
       ensure_installed = {
         "bash-language-server",
+        "clangd",
         "json-lsp",
         "lua-language-server",
         "marksman",
+        "neocmakelsp",
         "pyright",
         "ruff",
         "shellcheck",

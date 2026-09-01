@@ -86,9 +86,15 @@ mkdir -p \
 lockfile="${target_home}/.config/nvim/lazy-lock.json"
 lazy_root="${target_home}/.local/share/nvim/lazy"
 lazy_path="${lazy_root}/lazy.nvim"
+lazyvim_path="${lazy_root}/LazyVim"
 lazy_commit="$(
   NVIM_LOCKFILE="${lockfile}" \
   NVIM_LAZY_PLUGIN=lazy.nvim \
+    nvim --clean --headless -l "${script_dir}/read-lazy-lock-commit.lua"
+)"
+lazyvim_commit="$(
+  NVIM_LOCKFILE="${lockfile}" \
+  NVIM_LAZY_PLUGIN=LazyVim \
     nvim --clean --headless -l "${script_dir}/read-lazy-lock-commit.lua"
 )"
 
@@ -105,6 +111,22 @@ if ! git -C "${lazy_path}" cat-file -e "${lazy_commit}^{commit}" 2>/dev/null; th
   git -C "${lazy_path}" fetch --filter=blob:none origin "${lazy_commit}"
 fi
 git -C "${lazy_path}" checkout --detach "${lazy_commit}"
+
+# LazyVim owns most imported plugin specs. Restore it before Neovim starts so
+# lazy.nvim sees the complete spec on its first install pass and cannot prune
+# unseen entries from the lockfile.
+if [[ ! -d "${lazyvim_path}/.git" ]]; then
+  if [[ -e "${lazyvim_path}" ]]; then
+    echo "bootstrap-nvim.sh: ${lazyvim_path} exists but is not a Git checkout" >&2
+    exit 65
+  fi
+  git clone --filter=blob:none https://github.com/LazyVim/LazyVim.git "${lazyvim_path}"
+fi
+
+if ! git -C "${lazyvim_path}" cat-file -e "${lazyvim_commit}^{commit}" 2>/dev/null; then
+  git -C "${lazyvim_path}" fetch --filter=blob:none origin "${lazyvim_commit}"
+fi
+git -C "${lazyvim_path}" checkout --detach "${lazyvim_commit}"
 
 env \
   HOME="${target_home}" \

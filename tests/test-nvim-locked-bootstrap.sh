@@ -30,6 +30,9 @@ if ! cmp -s \
   "${dotfiles_root}/nvim/.config/nvim/lazy-lock.json" \
   "${fixture_root}/nvim/.config/nvim/lazy-lock.json"; then
   echo "FAIL: clean bootstrap changed lazy-lock.json" >&2
+  diff -u \
+    "${dotfiles_root}/nvim/.config/nvim/lazy-lock.json" \
+    "${fixture_root}/nvim/.config/nvim/lazy-lock.json" >&2 || true
   exit 1
 fi
 
@@ -48,6 +51,7 @@ env \
   nvim --headless \
     "+lua assert(require('lazy.core.config').plugins.LazyVim, 'LazyVim spec is missing')" \
     "+lua assert(vim.g.colors_name == 'tokyonight-moon', 'unexpected colorscheme: ' .. tostring(vim.g.colors_name))" \
+    "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-cpp-toolchain.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-installed-mason.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-installed-treesitter.lua')" \
     "+qa"

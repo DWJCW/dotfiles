@@ -1,8 +1,8 @@
 # LazyVim 小抄确定性审计
 
-- 结果：**69/69 通过**
-- 时间：2026-08-10 10:18:42 +0800
-- 配置指纹：`4ffe73584b307adce5d369ea5e4c491081db67169c18597c393e5b9bea2ebc8e`
+- 结果：**68/69 通过**
+- 时间：2026-08-27 18:51:44 +0800
+- 配置指纹：`34732c0097bd38501eb68ff2f95faf94f3180d90308097c0c73e0057c273e8d1`
 - 原则：每一个显示键位都来自同一份清单；映射检查实际 `lhs`、mode、上下文、description，并在可稳定比较时检查 RHS。
 
 | 状态 | 显示键位 | 上下文 | 被检查对象 | 预期结果 | 实际结果 |
@@ -42,7 +42,7 @@
 | PASS | `\ l t` | tex | `<localleader>lt` | LaTeX 目录 | <plug>(vimtex-toc-open) |
 | PASS | `\ l k` | tex | `<localleader>lk` | 停止编译器 | <plug>(vimtex-stop) |
 | PASS | `\ l c` | tex | `<localleader>lc` | 清理普通编译产物 | <plug>(vimtex-clean) |
-| PASS | `⇧⌘ + 点击 PDF` | tex | `skim_inverse` | Skim 反向跳回源码 | Skim preset=Custom, editor=/opt/homebrew/bin/nvim, inverse=true |
+| FAIL | `⇧⌘ + 点击 PDF` | tex | `skim_inverse` | Skim 反向跳回源码 | Skim preset=, editor=, inverse=false |
 | PASS | `Ctrl s` | global | `<C-s>` | 保存 | Save File → <cmd>w<cr><esc> |
 | PASS | `Space c f` | global | `<leader>cf` | 格式化文件/选区 | Format → <Lua callback> @ ...l/share/nvim/lazy/LazyVim/lua/lazyvim/config/keymaps.lua:120 |
 | PASS | `Space c f` | global | `<leader>cf` | 格式化文件/选区 | Format → <Lua callback> @ ...l/share/nvim/lazy/LazyVim/lua/lazyvim/config/keymaps.lua:120 |
