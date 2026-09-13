@@ -1,18 +1,27 @@
 # Dotfiles
 
-This repository manages local terminal and editor configuration with GNU Stow.
+This repository manages local terminal and editor configuration with GNU Stow
+on Linux and macOS.
 
 Managed packages:
 
 - `zsh` (Oh My Zsh with a colorful, font-independent prompt)
 - `tmux`
-- `kitty`
+- `kitty` (shared config plus a platform-selected overlay)
 - `nvim` (the complete LazyVim configuration, including the generated
   iPad cheat sheet and its source/audit scripts)
 
-## Dependencies
+## Platform and dependencies
 
-Core tools on `PATH`: `zsh`, `nvim`, `tmux`, `kitty`, `stow`, `git`.
+The platform defaults to automatic detection: Linux (including WSL) or macOS.
+Set `DOTFILES_PLATFORM=linux`, `DOTFILES_PLATFORM=macos`, or `DOTFILES_PLATFORM=auto`
+to override or test the choice. Unsupported values fail immediately. The
+bootstrap scripts only inspect dependencies and print installation suggestions;
+they never invoke `brew`, `apt`, `pacman`, or another package manager.
+
+The Neovim bootstrap requires `stow`, `git`, and Neovim 0.12 or newer when
+restoring plugins (`stow` alone is enough for `--skip-restore`). The complete
+shell setup also uses `zsh`, `tmux`, and `kitty`.
 
 Additional binaries the Neovim configuration and its tooling expect:
 
@@ -24,10 +33,25 @@ Additional binaries the Neovim configuration and its tooling expect:
   parsers. LazyVim can obtain the CLI through Mason when it is not on `PATH`.
 - `cmake` and optionally `ninja` — configure and build C/C++ projects from the
   CMake integration.
-- `magick` (ImageMagick) and Google Chrome — `scripts/build-cheatsheet.sh`
+- `magick` (ImageMagick) and a Chrome/Chromium executable on `PATH` —
+  `scripts/build-cheatsheet.sh`
   renders the iPad cheat-sheet PNG from HTML and verifies it.
 - `gs` (Ghostscript) — Snacks image preview for PDFs (`:edit *.pdf`).
-- Skim — VimTeX viewer and SyncTeX inverse search for LaTeX.
+- macOS: Skim is preferred for VimTeX and SyncTeX inverse search; `open` is a
+  startup-safe fallback when Skim is not installed.
+- Linux: VimTeX selects `zathura`, then `okular`, then `xdg-open`; if none is
+  available, Neovim starts normally and emits a warning when the capability is
+  configured.
+
+Check the environment without linking files or installing anything:
+
+```sh
+./scripts/bootstrap-nvim.sh --check-deps
+```
+
+Missing core dependencies make this command fail. Missing viewers, browsers,
+fonts, and other feature dependencies only produce warnings and platform-
+appropriate suggestions.
 
 The bootstrap waits for the Mason toolchain declared by
 `lua/plugins/workflow.lua`: clangd, neocmakelsp, cmakelang, cmakelint, pyright,
@@ -49,6 +73,16 @@ The Zsh bootstrap clones Oh My Zsh into `~/.oh-my-zsh` and links the tracked
 aside or merge it into `zsh/.zshrc` first. The configuration uses the built-in
 `robbyrussell` theme, so its colored prompt and Git status do not require a
 Nerd Font.
+
+Link Kitty and select its overlay with:
+
+```sh
+./scripts/bootstrap-kitty.sh
+```
+
+The shared Kitty file is always linked. Linux selects an empty platform file;
+macOS selects the file containing `macos_option_as_alt left`. Rerunning the
+bootstrap is safe, including after changing `DOTFILES_PLATFORM`.
 
 Install the Neovim configuration with:
 
@@ -73,6 +107,11 @@ To link only the configuration without network access:
 
 For an alternate target (including isolated tests), pass `--home PATH`.
 
+The Neovim platform capability module is available as
+`lua/config/platform.lua`. It owns platform detection, executable checks, PDF
+viewer selection, and macOS/Skim probing so plugin specs do not call `uname`,
+`defaults`, or other platform commands directly.
+
 ## What is portable
 
 The complete personal configuration is tracked, including LazyVim specs,
@@ -92,13 +131,15 @@ personal configuration.
 Install or refresh links from the repository root:
 
 ```sh
-stow -t "$HOME" zsh tmux kitty nvim
+stow -t "$HOME" zsh tmux nvim
+./scripts/bootstrap-kitty.sh
 ```
 
 Remove links without deleting tracked files:
 
 ```sh
-stow -D -t "$HOME" zsh tmux kitty nvim
+stow -D -t "$HOME" zsh tmux nvim
+stow -D -t "$HOME" kitty-linux kitty-macos kitty
 ```
 
 Repository layout follows Stow's target-relative structure, so files inside
@@ -116,6 +157,15 @@ idempotent bootstrap:
 
 ```sh
 ./tests/test-nvim-portable-bootstrap.sh
+```
+
+Exercise platform overrides, Linux PDF viewer fallback, Kitty overlays, and the
+Darwin-only zsh plugin (the zsh test skips when zsh is not installed):
+
+```sh
+./tests/test-platform.sh
+./tests/test-kitty-platform.sh
+./tests/test-zsh-platform.sh
 ```
 
 Run the slower network integration test, which restores every plugin into an

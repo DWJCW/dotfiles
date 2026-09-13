@@ -1,5 +1,6 @@
 local M = {}
 
+local platform = require("config.platform")
 local config_dir = vim.fn.stdpath("config")
 local report_path = config_dir .. "/CHEATSHEET-AUDIT.md"
 local manifest_path = config_dir .. "/cheatsheet-audit.json"
@@ -413,15 +414,8 @@ local function capability_result(binding)
   end
 
   if binding.capability == "skim_inverse" then
-    local preset_ok, preset = shell({ "defaults", "read", "net.sourceforge.skim-app.skim", "SKTeXEditorPreset" })
-    local command_ok, editor = shell({ "defaults", "read", "net.sourceforge.skim-app.skim", "SKTeXEditorCommand" })
-    local args_ok, args = shell({ "defaults", "read", "net.sourceforge.skim-app.skim", "SKTeXEditorArguments" })
-    local pass = vim.g.vimtex_view_method == "skim"
-      and vim.g.vimtex_view_skim_sync == 1
-      and preset_ok and preset == "Custom"
-      and command_ok and editor:match("nvim$") ~= nil
-      and args_ok and args:find("VimtexInverseSearch", 1, true) ~= nil
-    return pass, ("Skim preset=%s, editor=%s, inverse=%s"):format(preset, editor, tostring(args:find("VimtexInverseSearch", 1, true) ~= nil))
+    local result = platform.skim_inverse_search()
+    return result.ok, result.detail
   end
 
   return false, "未知 capability: " .. tostring(binding.capability)

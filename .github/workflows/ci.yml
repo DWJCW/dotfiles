@@ -1,0 +1,114 @@
+name: dotfiles
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+    env:
+      DOTFILES_PLATFORM: ${{ matrix.platform }}
+      NVIM_BOOTSTRAP_MASON_TIMEOUT_MS: 900000
+      NVIM_BOOTSTRAP_TREESITTER_TIMEOUT_MS: 900000
+
+    steps:
+      - name: Check out dotfiles
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake nodejs npm stow zsh
+
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install cmake node stow zsh
+
+      - name: Install the pinned Neovim release
+        shell: bash
+        run: |
+          set -euo pipefail
+          nvim_version=v0.12.3
+          case "${RUNNER_OS}:$(uname -m)" in
+            Linux:x86_64)
+              archive_name=nvim-linux-x86_64.tar.gz
+              directory_name=nvim-linux-x86_64
+              ;;
+            macOS:arm64)
+              archive_name=nvim-macos-arm64.tar.gz
+              directory_name=nvim-macos-arm64
+              ;;
+            macOS:x86_64)
+              archive_name=nvim-macos-x86_64.tar.gz
+              directory_name=nvim-macos-x86_64
+              ;;
+            *)
+              echo "Unsupported runner: ${RUNNER_OS}:$(uname -m)" >&2
+              exit 1
+              ;;
+          esac
+          archive_path="${RUNNER_TEMP}/${archive_name}"
+          curl --fail --location --retry 3 \
+            --output "${archive_path}" \
+            "https://github.com/neovim/neovim/releases/download/${nvim_version}/${archive_name}"
+          tar -xzf "${archive_path}" -C "${RUNNER_TEMP}"
+          echo "${RUNNER_TEMP}/${directory_name}/bin" >> "${GITHUB_PATH}"
+          export PATH="${RUNNER_TEMP}/${directory_name}/bin:${PATH}"
+          nvim --version | head -3
+
+      - name: Use a Mason-compatible Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install the Treesitter CLI used by the locked bootstrap
+        shell: bash
+        run: npm install --global tree-sitter-cli
+
+      - name: Check shell syntax
+        shell: bash
+        run: |
+          bash -n scripts/*.sh tests/*.sh nvim/.config/nvim/scripts/build-cheatsheet.sh
+          zsh -n zsh/.zshrc
+
+      - name: Check platform capabilities and dependencies
+        shell: bash
+        run: |
+          ./scripts/bootstrap-nvim.sh --check-deps
+          ./tests/test-platform.sh
+          ./tests/test-kitty-platform.sh
+          ./tests/test-zsh-platform.sh
+
+      - name: Link configuration and run a headless startup
+        shell: bash
+        run: |
+          ./scripts/bootstrap-nvim.sh --home "$HOME" --skip-restore
+          ./tests/test-nvim-dotfiles-sync.sh "$PWD" "$HOME/.config/nvim"
+          nvim --headless -i NONE '+qa'
+
+      - name: Verify portable bootstrap
+        shell: bash
+        run: |
+          ./tests/test-nvim-portable-bootstrap.sh
+          ./tests/test-zsh-portable-bootstrap.sh
+
+      - name: Verify locked plugin, Mason, and Treesitter bootstrap
+        shell: bash
+        run: ./tests/test-nvim-locked-bootstrap.sh

@@ -29,7 +29,27 @@ for _, name in ipairs(tools) do
 end
 
 if #missing > 0 then
-	vim.cmd("MasonInstall " .. table.concat(missing, " "))
+	-- Call Mason's package API directly. Running :MasonInstall from inside
+	-- vim.cmd() lets installer output (notably npm warnings) re-enter the Ex
+	-- command parser and produce a spurious E5108 in headless mode.
+	for _, name in ipairs(missing) do
+		local pkg = assert(registry.get_package(name), "Mason package is missing from the registry: " .. name)
+		local done = false
+		local success = false
+		local result
+
+		pkg:install({}, function(ok, value)
+			success = ok
+			result = value
+			done = true
+		end)
+
+		local finished = vim.wait(timeout_ms, function()
+			return done
+		end, 100)
+		assert(finished, ("timed out after %dms installing Mason package %s"):format(timeout_ms, name))
+		assert(success, ("Mason package failed to install %s: %s"):format(name, tostring(result)))
+	end
 end
 
 for _, name in ipairs(tools) do

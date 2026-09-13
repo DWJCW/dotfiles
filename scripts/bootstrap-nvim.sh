@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-usage: bootstrap-nvim.sh [--home PATH] [--skip-restore]
+usage: bootstrap-nvim.sh [--home PATH] [--skip-restore] [--check-deps]
 
 Install the complete tracked Neovim configuration with GNU Stow. By default,
 LazyVim and every plugin are then installed/restored to lazy-lock.json.
@@ -12,6 +12,7 @@ LazyVim and every plugin are then installed/restored to lazy-lock.json.
 Options:
   --home PATH       Stow target (default: the current user's home directory)
   --skip-restore    Link configuration only; do not start Neovim or fetch plugins
+  --check-deps      Check core and optional dependencies, then exit
   -h, --help        Show this help
 EOF
 }
@@ -20,6 +21,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 dotfiles_root="$(cd -- "${script_dir}/.." && pwd -P)"
 target_home="${HOME}"
 restore_plugins=1
+check_deps=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -36,6 +38,10 @@ while [[ $# -gt 0 ]]; do
       restore_plugins=0
       shift
       ;;
+    --check-deps)
+      check_deps=1
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -48,17 +54,177 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    echo "bootstrap-nvim.sh: required command not found: $1" >&2
-    exit 69
+# shellcheck source=platform.sh
+if ! source "${script_dir}/platform.sh"; then
+  echo "bootstrap-nvim.sh: failed to load the platform resolver" >&2
+  exit 70
+fi
+
+if ! platform="$(dotfiles_resolve_platform)"; then
+  exit 64
+fi
+
+missing_core=0
+missing_optional=0
+
+check_core_command() {
+  local command_name="$1"
+  if command -v "${command_name}" >/dev/null 2>&1; then
+    echo "OK   core: ${command_name}"
+  else
+    echo "FAIL core: ${command_name} (required)" >&2
+    missing_core=1
   fi
 }
 
-require_command stow
-if [[ "${restore_plugins}" -eq 1 ]]; then
-  require_command git
-  require_command nvim
+check_optional_command() {
+  local label="$1"
+  local command_name="$2"
+  if command -v "${command_name}" >/dev/null 2>&1; then
+    echo "OK   optional: ${label} (${command_name})"
+  else
+    echo "WARN optional: ${label} is unavailable (${command_name})" >&2
+    missing_optional=1
+  fi
+}
+
+find_browser() {
+  local candidate candidate_path
+
+  if [[ -n "${CHEATSHEET_BROWSER:-}" ]]; then
+    if [[ "${CHEATSHEET_BROWSER}" == */* ]]; then
+      [[ -x "${CHEATSHEET_BROWSER}" ]] && printf '%s\n' "${CHEATSHEET_BROWSER}"
+    else
+      command -v "${CHEATSHEET_BROWSER}" 2>/dev/null || true
+    fi
+    return 0
+  fi
+
+  for candidate in google-chrome google-chrome-stable chromium chromium-browser chrome; do
+    if candidate_path="$(command -v "${candidate}" 2>/dev/null)"; then
+      printf '%s\n' "${candidate_path}"
+      return 0
+    fi
+  done
+  return 0
+}
+
+skim_available() {
+  if command -v skim >/dev/null 2>&1; then return 0; fi
+  if [[ -d "${HOME}/Applications/Skim.app" || -d "/Applications/Skim.app" ]]; then return 0; fi
+  if command -v osascript >/dev/null 2>&1 \
+    && osascript -l JavaScript -e 'Application("Skim").id()' >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+check_pdf_viewer() {
+  local candidate
+  if [[ "${platform}" == "macos" ]]; then
+    if skim_available; then
+      echo "OK   optional: PDF viewer (Skim)"
+    elif command -v open >/dev/null 2>&1; then
+      echo "OK   optional: PDF viewer fallback (open); Skim is unavailable" >&2
+      missing_optional=1
+    else
+      echo "WARN optional: no macOS PDF viewer (Skim or open)" >&2
+      missing_optional=1
+    fi
+    return 0
+  fi
+
+  for candidate in zathura okular xdg-open; do
+    if command -v "${candidate}" >/dev/null 2>&1; then
+      echo "OK   optional: PDF viewer (${candidate})"
+      return 0
+    fi
+  done
+  echo "WARN optional: no Linux PDF viewer (tried zathura, okular, xdg-open)" >&2
+  missing_optional=1
+}
+
+check_fonts() {
+  local matched_font
+  if command -v fc-match >/dev/null 2>&1; then
+    matched_font="$(fc-match -f '%{family}\n' 'Noto Sans CJK SC' 2>/dev/null || true)"
+    if [[ -n "${matched_font}" ]]; then
+      echo "OK   optional: CJK font fallback (${matched_font%%$'\n'*})"
+    else
+      echo "WARN optional: no fontconfig CJK font match; cheat-sheet glyphs may fall back poorly" >&2
+      missing_optional=1
+    fi
+  elif [[ "${platform}" == "macos" ]]; then
+    echo "OK   optional: macOS system font fallback (fontconfig not required)"
+  else
+    echo "WARN optional: fc-match is unavailable; CJK font support was not checked" >&2
+    missing_optional=1
+  fi
+}
+
+check_compiler() {
+  local compiler
+  for compiler in cc gcc clang c++; do
+    if command -v "${compiler}" >/dev/null 2>&1; then
+      echo "OK   optional: C/C++ compiler (${compiler})"
+      return 0
+    fi
+  done
+  echo "WARN optional: no C/C++ compiler was found (Treesitter/CMake builds may fail)" >&2
+  missing_optional=1
+}
+
+check_dependencies() {
+  echo "Detected platform: ${platform}"
+  check_core_command stow
+  if [[ "${restore_plugins}" -eq 1 || "${check_deps}" -eq 1 ]]; then
+    check_core_command git
+    check_core_command nvim
+  fi
+
+  check_pdf_viewer
+  check_optional_command "fd for Python virtualenv selection" fd
+  check_optional_command "lazygit" lazygit
+  check_optional_command "ImageMagick" magick
+  check_optional_command "Ghostscript for PDF previews" gs
+  check_optional_command "XeLaTeX" xelatex
+  check_optional_command "latexmk" latexmk
+  check_optional_command "tree-sitter CLI" tree-sitter
+  check_optional_command "CMake" cmake
+  check_compiler
+  check_fonts
+
+  if [[ -n "$(find_browser)" ]]; then
+    echo "OK   optional: Chrome/Chromium browser"
+  else
+    echo "WARN optional: Chrome/Chromium browser is unavailable (needed only to rebuild the cheat sheet)" >&2
+    missing_optional=1
+  fi
+
+  if [[ "${missing_core}" -ne 0 || "${missing_optional}" -ne 0 ]]; then
+    if [[ "${missing_core}" -ne 0 ]]; then
+      echo "Required dependencies are missing; bootstrap cannot continue." >&2
+    else
+      echo "Optional features are incomplete; bootstrap will continue." >&2
+    fi
+    if [[ "${platform}" == "macos" ]]; then
+      echo "Install suggestions (not executed): brew install neovim stow fd lazygit imagemagick ghostscript cmake tree-sitter; brew install --cask skim google-chrome" >&2
+    else
+      echo "Install suggestions (not executed): sudo apt install git neovim stow fd-find lazygit imagemagick ghostscript latexmk texlive-xetex cmake build-essential; or use the equivalent pacman packages." >&2
+    fi
+  fi
+
+  [[ "${missing_core}" -eq 0 ]]
+}
+
+if ! check_dependencies; then
+  echo "bootstrap-nvim.sh: one or more core dependencies are missing" >&2
+  exit 69
+fi
+
+if [[ "${check_deps}" -eq 1 ]]; then
+  echo "Dependency check complete; no packages were installed."
+  exit 0
 fi
 
 mkdir -p "${target_home}"
@@ -135,11 +301,13 @@ env \
   XDG_STATE_HOME="${target_home}/.local/state" \
   XDG_CACHE_HOME="${target_home}/.cache" \
   NVIM_APPNAME=nvim \
+  DOTFILES_PLATFORM="${platform}" \
   NVIM_DOTFILES_ROOT="${dotfiles_root}" \
   nvim --headless \
     "+Lazy! restore" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/scripts/bootstrap-mason.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/scripts/bootstrap-treesitter.lua')" \
+    "+if v:errmsg !=# '' | cquit 1 | endif" \
     "+qa"
 
 echo "Restored locked plugins, Mason tools, and Treesitter parsers without changing the lockfile"

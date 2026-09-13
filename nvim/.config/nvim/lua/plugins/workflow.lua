@@ -1,3 +1,32 @@
+local platform = require("config.platform")
+
+local function configure_vimtex_viewer()
+  local viewer = platform.pdf_viewer()
+
+  -- VimTeX supports a dedicated Zathura and Skim backend. Okular and the
+  -- desktop fallback use VimTeX's generic viewer backend.
+  vim.g.vimtex_view_method = viewer.method
+  vim.g.vimtex_view_skim_sync = 0
+  vim.g.vimtex_view_skim_activate = 0
+
+  if viewer.method == "skim" then
+    vim.g.vimtex_view_skim_sync = 1
+    vim.g.vimtex_view_skim_activate = 1
+  else
+    -- Keep the generic backend deterministic even when the selected viewer
+    -- is not currently installed. VimTeX will report a view-time warning;
+    -- its startup remains usable.
+    vim.g.vimtex_view_general_viewer = viewer.command or viewer.fallback_command
+    vim.g.vimtex_view_general_options = "@pdf"
+  end
+
+  if viewer.warning then
+    vim.schedule(function()
+      vim.notify(viewer.warning, vim.log.levels.WARN, { title = "Dotfiles PDF 能力" })
+    end)
+  end
+end
+
 return {
   {
     "LazyVim/LazyVim",
@@ -74,13 +103,12 @@ return {
     end,
   },
 
-  -- Match the thesis repository: XeLaTeX, latexmk, build/, and Skim SyncTeX.
+  -- Match the thesis repository: XeLaTeX, latexmk, build/, and the selected
+  -- platform PDF viewer. Platform detection stays in config.platform.
   {
     "lervag/vimtex",
     init = function()
-      vim.g.vimtex_view_method = "skim"
-      vim.g.vimtex_view_skim_sync = 1
-      vim.g.vimtex_view_skim_activate = 1
+      configure_vimtex_viewer()
       vim.g.vimtex_compiler_method = "latexmk"
       vim.g.vimtex_quickfix_mode = 2
       vim.g.vimtex_quickfix_open_on_warning = 0

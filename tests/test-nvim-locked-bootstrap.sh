@@ -54,6 +54,7 @@ env \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-cpp-toolchain.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-installed-mason.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-installed-treesitter.lua')" \
+    "+if v:errmsg !=# '' | cquit 1 | endif" \
     "+qa"
 
 "${fixture_root}/tests/test-nvim-dotfiles-sync.sh" \

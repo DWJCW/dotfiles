@@ -48,6 +48,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# shellcheck source=platform.sh
+source "${script_dir}/platform.sh"
+if ! platform="$(dotfiles_resolve_platform)"; then
+  exit 64
+fi
+
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "bootstrap-zsh.sh: required command not found: $1" >&2
@@ -84,6 +90,7 @@ stow \
   --no-folding \
   zsh
 
+echo "Detected platform: ${platform}"
 echo "Linked the Zsh configuration into ${target_home}/.zshrc"
 if [[ "${install_oh_my_zsh}" -eq 0 ]]; then
   echo "Skipped Oh My Zsh installation"

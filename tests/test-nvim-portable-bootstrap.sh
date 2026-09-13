@@ -26,6 +26,7 @@ required_cheatsheet_files=(
   "LazyVim-Cheatsheet-iPadPro-11inch.html"
   "LazyVim-Cheatsheet-iPadPro-11inch.png"
   "lua/config/cheatsheet.lua"
+  "lua/config/platform.lua"
   "scripts/build-cheatsheet.sh"
   "scripts/cheatsheet-audit.lua"
   "scripts/cheatsheet-build.lua"

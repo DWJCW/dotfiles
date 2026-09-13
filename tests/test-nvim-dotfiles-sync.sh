@@ -26,9 +26,11 @@ manifest() {
   local root="$1"
   (
     cd "${root}"
-    find -L . -type f -print0 \
-      | LC_ALL=C sort -z \
-      | xargs -0 shasum -a 256
+    find -L . -type f -print \
+      | LC_ALL=C sort \
+      | while IFS= read -r path; do
+          shasum -a 256 "${path}"
+        done
   )
 }
 
