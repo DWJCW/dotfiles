@@ -93,6 +93,7 @@ jobs:
         run: |
           ./scripts/bootstrap-nvim.sh --check-deps
           ./tests/test-platform.sh
+          ./tests/test-cheatsheet-fingerprint.sh
           ./tests/test-kitty-platform.sh
           ./tests/test-zsh-platform.sh
 

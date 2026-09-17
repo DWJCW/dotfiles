@@ -472,7 +472,11 @@ local function prepare_contexts()
   vim.fn.writefile({ "def answer() -> int:", "    return 42", "", "answer()" }, python_path)
   vim.cmd("silent edit " .. vim.fn.fnameescape(python_path))
   vim.wait(12000, function()
-    return vim.iter(vim.lsp.get_clients({ bufnr = 0 })):any(function(client) return client.name == "pyright" end)
+    -- A client is listed before initialize/LspAttach finishes. Wait for
+    -- capabilities and LazyVim's buffer mappings before auditing them.
+    return vim.iter(vim.lsp.get_clients({ bufnr = 0 })):any(function(client)
+      return client.name == "pyright" and client.initialized
+    end) and not vim.tbl_isempty(vim.fn.maparg("gd", "n", false, true))
   end, 100)
   contexts.python = vim.api.nvim_get_current_buf()
 
@@ -655,9 +659,11 @@ function M.fingerprint()
     vim.list_extend(paths, vim.fn.globpath(config_dir, pattern, false, true))
   end
   table.sort(paths)
-  local parts = { vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch }
+  -- This is a configuration fingerprint shared through Git, not a machine
+  -- identity. Absolute HOME paths and Neovim patch versions are not content.
+  local parts = {}
   for _, path in ipairs(paths) do
-    parts[#parts + 1] = path
+    parts[#parts + 1] = path:sub(#config_dir + 2)
     parts[#parts + 1] = read_text(path) or "<missing>"
   end
   return vim.fn.sha256(table.concat(parts, "\0"))
