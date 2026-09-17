@@ -34,12 +34,12 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake nodejs npm stow zsh
+          sudo apt-get install -y build-essential cmake fd-find ripgrep nodejs npm stow zsh
 
       - name: Install macOS dependencies
         if: runner.os == 'macOS'
         shell: bash
-        run: brew install cmake node stow zsh
+        run: brew install cmake fd ripgrep node stow zsh
 
       - name: Install the pinned Neovim release
         shell: bash
