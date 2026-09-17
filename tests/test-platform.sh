@@ -35,7 +35,7 @@ run_lua() {
   DOTFILES_PLATFORM="${platform}" PATH="${path}" "${nvim_bin}" \
     --clean --headless -u NONE \
     --cmd "set rtp^=${config_dir}" \
-    -c "lua ${code}" \
+    -c "lua local ok, err = xpcall(function() vim.fn.isdirectory = function() return 0 end; ${code} end, debug.traceback); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cquit 1') end" \
     -c 'qa!'
 }
 

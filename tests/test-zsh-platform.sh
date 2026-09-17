@@ -25,7 +25,7 @@ printf 'print -r -- "${(j:,:)plugins}" > "${DOTFILES_ZSH_TEST_OUTPUT}"\n' \
 run_zsh() {
   local platform="$1"
   local output_path="${tmp_dir}/${platform}.plugins"
-  DOTFILES_PLATFORM="${platform}" \
+  HOME="${tmp_dir}" DOTFILES_PLATFORM="${platform}" \
   DOTFILES_ZSH_TEST_OUTPUT="${output_path}" \
   ZSH="${tmp_dir}/oh-my-zsh" \
     zsh -f -c "source '${zshrc}'"

@@ -42,3 +42,6 @@ fi
 unset dotfiles_platform
 
 source "$ZSH/oh-my-zsh.sh"
+
+# Machine-specific paths, aliases, and credentials stay outside the repository.
+[[ ! -f "$HOME/.zshrc.local" ]] || source "$HOME/.zshrc.local"

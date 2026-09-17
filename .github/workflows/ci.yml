@@ -101,7 +101,7 @@ jobs:
         run: |
           ./scripts/bootstrap-nvim.sh --home "$HOME" --skip-restore
           ./tests/test-nvim-dotfiles-sync.sh "$PWD" "$HOME/.config/nvim"
-          nvim --headless -i NONE '+qa'
+          nvim --headless -i NONE '+if v:errmsg !=# "" | cquit 1 | endif' '+qa'
 
       - name: Verify portable bootstrap
         shell: bash

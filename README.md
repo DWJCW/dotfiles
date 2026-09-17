@@ -176,3 +176,41 @@ headlessly:
 ```sh
 ./tests/test-nvim-locked-bootstrap.sh
 ```
+
+## Updating existing machines
+
+Use the same `main` branch on each machine. Update the repository first, then
+let Stow refresh the links (do not copy edited configurations into `$HOME`):
+
+```sh
+git pull --ff-only
+export PATH="$HOME/.local/bin:$PATH"  # prefer a user-installed Neovim over old system packages
+stow --restow --no-folding -t "$HOME" tmux
+./scripts/bootstrap-kitty.sh
+./scripts/bootstrap-nvim.sh
+./tests/test-nvim-dotfiles-sync.sh
+```
+
+On machines using Zsh, also run `./scripts/bootstrap-zsh.sh`. When migrating an
+existing `.zshrc`, back it up and move machine-specific aliases, Conda setup,
+paths, and credentials into `~/.zshrc.local` before linking. The managed `.zshrc`
+loads that optional, untracked file after Oh My Zsh. Do not commit credentials
+or machine-specific overrides. Installing the config does not change the
+account's login shell.
+
+In the Snacks file explorer, `y` copies selected file paths. Over SSH it also
+sends those paths to the client terminal's clipboard through OSC 52, including
+inside tmux. Kitty permits clipboard writes; tmux enables clipboard forwarding.
+Normal editing registers and paste behavior are unchanged. Restart Neovim after
+updating; reload existing tmux sessions with `tmux source-file ~/.tmux.conf`.
+
+To validate the installed editor without a UI:
+
+```sh
+nvim --headless -i NONE \
+  '+lua dofile("tests/validate-explorer-clipboard.lua")' \
+  '+lua dofile("tests/validate-cpp-toolchain.lua")' \
+  '+lua dofile("tests/validate-installed-mason.lua")' \
+  '+lua dofile("tests/validate-installed-treesitter.lua")' \
+  '+if v:errmsg !=# "" | cquit 1 | endif' '+qa'
+```
