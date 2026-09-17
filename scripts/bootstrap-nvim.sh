@@ -182,8 +182,8 @@ check_dependencies() {
     check_core_command nvim
     if command -v nvim >/dev/null 2>&1; then
       if ! nvim --clean --headless -u NONE -i NONE \
-        '+if !has("nvim-0.12") | cquit 1 | endif' +qa; then
-        echo "FAIL core: Neovim 0.12 or newer is required; check PATH (selected $(command -v nvim))" >&2
+        '+if !has("nvim-0.12.4") | cquit 1 | endif' +qa; then
+        echo "FAIL core: Neovim 0.12.4 or newer is required; check PATH (selected $(command -v nvim))" >&2
         missing_core=1
       fi
     fi

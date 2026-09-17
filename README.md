@@ -19,7 +19,7 @@ to override or test the choice. Unsupported values fail immediately. The
 bootstrap scripts only inspect dependencies and print installation suggestions;
 they never invoke `brew`, `apt`, `pacman`, or another package manager.
 
-The Neovim bootstrap requires `stow`, `git`, and Neovim 0.12 or newer when
+The Neovim bootstrap requires `stow`, `git`, and Neovim 0.12.4 or newer when
 restoring plugins (`stow` alone is enough for `--skip-restore`). The complete
 shell setup also uses `zsh`, `tmux`, and `kitty`.
 
@@ -208,6 +208,7 @@ To validate the installed editor without a UI:
 
 ```sh
 nvim --headless -i NONE \
+  '+lua dofile("tests/validate-filetypes.lua")' \
   '+lua dofile("tests/validate-explorer-clipboard.lua")' \
   '+lua dofile("tests/validate-cpp-toolchain.lua")' \
   '+lua dofile("tests/validate-installed-mason.lua")' \

@@ -27,9 +27,9 @@ local function validate()
     action(picker)
     assert(#sent == 1, "local yanks should keep their native clipboard behavior")
   end, debug.traceback)
+  vim.fn.setreg('"', old_register)
   vim.env.SSH_CONNECTION, vim.o.clipboard = old_ssh, old_clipboard
   vim.api.nvim_ui_send, Snacks.notify.info = old_send, old_notify
-  vim.fn.setreg('"', old_register)
   assert(ok, err)
   print("PASS: SSH explorer y sends Unicode/multiple paths through OSC 52 and preserves local behavior")
 end

@@ -51,6 +51,7 @@ env \
   nvim --headless \
     "+lua assert(require('lazy.core.config').plugins.LazyVim, 'LazyVim spec is missing')" \
     "+lua assert(vim.g.colors_name == 'tokyonight-moon', 'unexpected colorscheme: ' .. tostring(vim.g.colors_name))" \
+    "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-filetypes.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-explorer-clipboard.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-cpp-toolchain.lua')" \
     "+lua dofile(assert(os.getenv('NVIM_DOTFILES_ROOT')) .. '/tests/validate-installed-mason.lua')" \
